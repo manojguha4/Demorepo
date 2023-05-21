@@ -1,0 +1,1705 @@
+:::::::::::::::::::::::DEVOPS LECTURES:::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::Jinkins installtion on EC2::::::::::::::::::::::
+
+https://pkg.jenkins.io/redhat-stable/
+
+[root@ip-172-31-15-126 ~]# sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+
+[root@ip-172-31-15-126 ~]# sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+:::::::::
+If you've previously imported the key from Jenkins, the rpm --import will fail because you already have a key. 
+Please ignore that and move on.
+:::::::::
+Check 1st java version:
+[root@ip-172-31-15-126 ~]# java -version
+
+[root@ip-172-31-15-126 ~]# amazon-linux-extras install epel
+
+[root@ip-172-31-15-126 ~]# yum install fontconfig java-11-openjdk
+
+::FOR AWS: EC2 : # sudo amazon-linux-extras install java-openjdk11
+
+::Now install jenkins::: make sure the epel packages are installed:::
+
+[root@ip-172-31-15-126 ~]# yum install jenkins
+
+::check the jenkins service status: 
+
+[root@ip-172-31-15-126 ~]# service jenkins status
+
+:: To start the service of jenkins::
+[root@ip-172-31-15-126 ~]# service jenkins start
+
+Now open at browser with public ip:8080 ::: http://13.233.253.100:8080/
+
+Check the pass: 
+[root@jenkins-server ~]# cat /var/lib/jenkins/secrets/initialAdminPassword
+
+Now by this pass open the gui.
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:::::::::::::::: Git installation over Jenkins instance :::::::::::::::::::::::::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+[root@jenkins-server ~]# yum install git
+
+Check the git version:
+[root@jenkins-server ~]# git -v
+[root@jenkins-server ~]# whereis git
+git: /usr/bin/git /usr/share/man/man1/git.1.gz
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:::::::::::::::::::::::: Maven installation on Jenkins server :::::::::::::::::::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Steps:
+https://maven.apache.org/install.html
+
+Download maven packages: https://maven.apache.org/download.cgi?.
+
+
+Now with cli: download the maven packages at any location like /opt
+
+[root@jenkins-server ~]# cd /opt
+[root@jenkins-server opt]# wget https://dlcdn.apache.org/maven/maven-3/3.9.2/binaries/apache-maven-3.9.2-bin.tar.gz
+[root@jenkins-server opt]# tar -xvzf apache-maven-3.9.2-bin.tar.gz
+[root@jenkins-server opt]# mv apache-maven-3.9.2 maven
+[root@jenkins-server opt]# ls -l
+total 9036
+-rw-r--r-- 1 root root 9248920 May  8 09:12 apache-maven-3.9.2-bin.tar.gz
+drwxr-xr-x 4 root root      33 Apr 20 18:29 aws
+drwxr-xr-x 6 root root      99 May 11 16:42 maven
+drwxr-xr-x 2 root root       6 Aug 16  2018 rh
+[root@jenkins-server opt]#
+
+[root@jenkins-server opt]# cd maven/
+[root@jenkins-server maven]# ls -l
+total 36
+drwxr-xr-x 2 root root    97 May 11 16:42 bin
+drwxr-xr-x 2 root root    76 May 11 16:42 boot
+drwxr-xr-x 3 root root    63 May  8 09:04 conf
+drwxr-xr-x 4 root root  4096 May 11 16:42 lib
+-rw-r--r-- 1 root root 18652 May  8 09:04 LICENSE
+-rw-r--r-- 1 root root  5036 May  8 09:04 NOTICE
+-rw-r--r-- 1 root root  2533 May  8 09:04 README.txt
+
+[root@jenkins-server maven]# cd bin
+[root@jenkins-server bin]# ls -l
+total 32
+-rw-r--r-- 1 root root  327 May  8 09:04 m2.conf
+-rwxr-xr-x 1 root root 5883 May  8 09:04 mvn
+-rw-r--r-- 1 root root 6324 May  8 09:04 mvn.cmd
+-rwxr-xr-x 1 root root 1684 May  8 09:04 mvnDebug
+-rw-r--r-- 1 root root 2169 May  8 09:04 mvnDebug.cmd
+-rwxr-xr-x 1 root root 1611 May  8 09:04 mvnyjp
+
+##### actual mvn is under /opt/maven/bin ####
+
+[root@jenkins-server bin]# mvn -v
+-bash: mvn: command not found
+
+
+### due to that issue we need to define the variable at ./bash_profile #####
+
+[root@jenkins-server bin]# cd ~
+[root@jenkins-server ~]# ls -al
+total 28
+dr-xr-x---  5 root root 169 May 11 12:46 .
+dr-xr-xr-x 18 root root 257 May 11 11:03 ..
+-rw-------  1 root root 632 May 11 12:46 .bash_history
+-rw-r--r--  1 root root  18 Oct 18  2017 .bash_logout
+-rw-r--r--  1 root root 176 Oct 18  2017 .bash_profile
+-rw-r--r--  1 root root 176 Oct 18  2017 .bashrc
+-rw-r--r--  1 root root 100 Oct 18  2017 .cshrc
+drwxr-xr-x  3 root root  19 May 11 12:37 .java
+drwxr-xr-x  9 root root 322 May 11 12:37 .jenkins
+drwx------  2 root root  29 May 11 11:03 .ssh
+-rw-r--r--  1 root root 129 Oct 18  2017 .tcshrc
+-rw-------  1 root root 751 May 11 12:45 .viminfo
+[root@jenkins-server ~]#
+
+To check the JAVA_HOME path:
+
+[ec2-user@jenkins-server ~]$ sudo -i
+[root@jenkins-server ~]#
+[root@jenkins-server ~]#
+[root@jenkins-server ~]# find / -iname jvm
+/etc/jvm
+/usr/lib/jvm
+/usr/share/jvm
+[root@jenkins-server ~]# cd /usr/lib/jvm
+[root@jenkins-server jvm]# ls -l
+total 0
+drwxr-xr-x 6 root root 68 May 11 11:50 java-11-openjdk-11.0.18.0.10-1.amzn2.0.1.x86_64
+lrwxrwxrwx 1 root root 21 May 11 11:50 jre -> /etc/alternatives/jre
+lrwxrwxrwx 1 root root 24 May 11 11:50 jre-11 -> /etc/alternatives/jre_11
+lrwxrwxrwx 1 root root 32 May 11 11:50 jre-11-openjdk -> /etc/alternatives/jre_11_openjdk
+lrwxrwxrwx 1 root root 47 May 11 11:50 jre-11-openjdk-11.0.18.0.10-1.amzn2.0.1.x86_64 -> java-11-openjdk-11.0.18.0.10-1.amzn2.0.1.x86_64
+lrwxrwxrwx 1 root root 29 May 11 11:50 jre-openjdk -> /etc/alternatives/jre_openjdk
+[root@jenkins-server jvm]#
+[root@jenkins-server jvm]# find / -iname java-11
+[root@jenkins-server jvm]# find / -iname java-11*
+find: ‘/proc/9403’: No such file or directory
+/usr/lib/jvm/java-11-openjdk-11.0.18.0.10-1.amzn2.0.1.x86_64
+/usr/share/doc/java-11-openjdk-11.0.18.0.10-1.amzn2.0.1.x86_64
+[root@jenkins-server jvm]#
+
+So the path is : /usr/lib/jvm/java-11-openjdk-11.0.18.0.10-1.amzn2.0.1.x86_64
+
+Now edit the .bash_profile:
+
+[root@jenkins-server ~]# vi .bash_profile
+[root@jenkins-server ~]# cat .bash_profile
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+M2_HOME=/opt/maven
+M2=/opt/maven/bin
+JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.18.0.10-1.amzn2.0.1.x86_64
+# User specific environment and startup programs
+
+PATH=$PATH:$HOME/bin:$JAVA_HOME:$M2_HOME:$M2
+
+export PATH
+[root@jenkins-server ~]#
+
+[root@jenkins-server ~]# echo $PATH
+/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin:/usr/lib/jvm/java-11-openjdk-11.0.18.0.10-1.amzn2.0.1.x86_64:/opt/maven:/opt/maven/bin
+[root@jenkins-server ~]# source .bash_profile
+[root@jenkins-server ~]# echo $PATH
+/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin:/usr/lib/jvm/java-11-openjdk-11.0.18.0.10-1.amzn2.0.1.x86_64:/opt/maven:/opt/maven/bin:/root/bin:/usr/lib/jvm/java-11-openjdk-11.0.18.0.10-1.amzn2.0.1.x86_64:/opt/maven:/opt/maven/bin
+[root@jenkins-server ~]#
+
+Now the command is running.
+
+[root@jenkins-server ~]# mvn -v
+Apache Maven 3.9.2 (c9616018c7a021c1c39be70fb2843d6f5f9b8a1c)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Red Hat, Inc., runtime: /usr/lib/jvm/java-11-openjdk-11.0.18.0.10-1.amzn2.0.1.x86_64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "5.10.177-158.645.amzn2.x86_64", arch: "amd64", family: "unix"
+[root@jenkins-server ~]#
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:::::::::::::::::::::::::   setting up tomcat server on EC2 instance ::::::::::::::::::::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+create once EC2 instance and login via private key.
+
+[ec2-user@ip-172-31-15-21 ~]$ sudo -i
+
+[root@ip-172-31-15-21 ~]# cat /etc/hostname
+ip-172-31-15-21.ap-south-1.compute.internal
+
+Change the hostname:
+
+[root@ip-172-31-15-21 ~]# vi /etc/hostname
+
+[root@ip-172-31-15-21 ~]# cat /etc/hostname
+Tomcat_Server
+
+[root@Tomcat_Server ~]#
+
+[root@Tomcat_Server ~]# amazon-linux-extras
+[root@Tomcat_Server ~]# amazon-linux-extras install java-openjdk11
+
+Check Java version now:
+[root@Tomcat_Server ~]# java --version
+
+Wget the tomcat SW:
+[root@Tomcat_Server ~]# pwd
+/root
+[root@Tomcat_Server ~]# cd /opt
+[root@Tomcat_Server opt]# ll
+total 0
+drwxr-xr-x 4 root root 33 May  5 18:09 aws
+drwxr-xr-x 2 root root  6 Aug 16  2018 rh
+
+[root@Tomcat_Server opt]# wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.8/bin/apache-tomcat-10.1.8.tar.gz
+
+Untar the tomcat tar file:
+[root@Tomcat_Server opt]# ll
+total 11808
+-rw-r--r-- 1 root root 12088035 Apr 14 19:56 apache-tomcat-10.1.8.tar.gz
+drwxr-xr-x 4 root root       33 May  5 18:09 aws
+drwxr-xr-x 2 root root        6 Aug 16  2018 rh
+
+[root@Tomcat_Server opt]# tar -xvzf apache-tomcat-10.1.8.tar.gz
+[root@Tomcat_Server opt]# mv apache-tomcat-10.1.8 tomcat
+
+To start the tomcat services:
+[root@Tomcat_Server opt]# cd tomcat/
+[root@Tomcat_Server tomcat]# cd bin
+[root@Tomcat_Server bin]# ./startup.sh
+
+########
+Now open the tomcat server with browser with ip:8080
+But we need to modify the context.xml file to operate the tomcat server at outside.
+########
+
+[root@Tomcat_Server opt]# cd tomcat/
+[root@Tomcat_Server tomcat]# find / -iname context.xml
+/opt/tomcat/conf/context.xml
+/opt/tomcat/webapps/docs/META-INF/context.xml
+/opt/tomcat/webapps/examples/META-INF/context.xml
+/opt/tomcat/webapps/host-manager/META-INF/context.xml
+/opt/tomcat/webapps/manager/META-INF/context.xml
+
+We need to update on host-manager/META-INF/context.xml and /manager/META-INF/context.xml
+Actually we need to comment out one line where tomcat server allow only from it own server.
+We need to access tomcar from outside also.
+
+So comment out the below line:
+
+ <!--  <Valve className="org.apache.catalina.valves.RemoteAddrValve"
+  allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" /> -->
+  
+Again start the tomcat server:
+[root@Tomcat_Server bin]# ./startup.sh
+
+Now It is asking for credentials:
+For we need to create the username and cred at conf directory:
+
+[root@Tomcat_Server tomcat]# cd conf/
+[root@Tomcat_Server conf]# vi tomcat-users.xml
+[root@Tomcat_Server conf]# cat tomcat-users.xml
+
+<role rolename="manager-gui"/>
+<role rolename="manager-script"/>
+<role rolename="manager-jmx"/>
+<role rolename="manager-status"/>
+<user username="admin" password="admin" roles="manager-gui, manager-script, manager-jmx, manager-status"/>
+<user username="deployer" password="deployer" roles="manager-script"/>
+<user username="tomcat" password="s3cret" roles="manager-gui"/>
+</tomcat-users>
+
+Then restart the tomcat server:
+For this we are creating two soft link for startup.sh and shutdown.sh at in /usr/local/bin/ path variable.
+
+[root@Tomcat_Server bin]# ln -s /opt/tomcat/bin/startup.sh /usr/local/bin/tomcatup
+[root@Tomcat_Server bin]# ln -s /opt/tomcat/bin/shutdown.sh /usr/local/bin/tomcatdown
+
+Now add /usr/local/bin at .bash_profile:
+
+[root@Tomcat_Server ~]# vi .bash_profile
+PATH=$PATH:$HOME/bin:/usr/local/bin
+
+[root@Tomcat_Server ~]# echo $PATH
+/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
+[root@Tomcat_Server ~]# source .bash_profile
+[root@Tomcat_Server ~]# echo $PATH
+/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin:/root/bin:/usr/local/bin
+
+Now restart the tomcat services:
+[root@Tomcat_Server ~]# tomcatdown
+[root@Tomcat_Server ~]# tomcatup
+
+
+
+Tomcat server cred:
+admin/admin
+tomcat/s3cret
+
+war/ear (artifact)file path:
+/var/lib/jenkins/workspace/Maven1stProject/webapp/target
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::: Docker installation :::::::::::::::::::::::::::::::::::::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+[root@ip-172-31-14-169 ~]# vi /etc/hostname
+docker-Host
+
+Then reboot server.
+[ec2-user@Docker-Host ~]$ sudo -i
+[root@ip-172-31-14-169 ~]# yum install docker -y
+[root@Docker-Host ~]# docker --version
+
+Check the services of docker:
+[root@Docker-Host ~]# service docker status
+[root@Docker-Host ~]# service docker start
+Redirecting to /bin/systemctl start docker.service
+
+docker.service - Docker Application Container Engine
+Loaded: loaded on : /usr/lib/systemd/system/docker.service
+
+Check the images
+[root@Docker-Host ~]# docker images
+
+Check the running container on docker:
+[root@Docker-Host ~]# docker ps
+
+Check how many container on docker:
+[root@Docker-Host ~]# docker ps -a
+
+Other docker imp commands:
+docker --help
+
+docker build ---------->Build an image from a Dockerfile
+docker commit---------->Create a new image from a container's changes
+docker pull  ---------->Pull an image or a repository from a registry
+docker push  ---------->Push an image or a repository to a registry
+docker run   ---------->Run a command in a new container
+
+
+:::::::::::::::::::: create a docker container ::::::::::::::::::::::::
+Pull a tomcat container.
+[root@Docker-Host ~]# docker pull tomcat
+
+[root@Docker-Host ~]# docker images
+REPOSITORY   TAG       IMAGE ID       CREATED      SIZE
+tomcat       latest    311570738ca3   9 days ago   475MB
+
+Now,
+[root@Docker-Host ~]# docker ps -a
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+[root@Docker-Host ~]# docker run -d --name tomcat-container -p 8081:8080 tomcat
+70b0abd1d7eb4fdd824e68aba7744a9035faf5135b774ceebfabaff3f5ccba27
+
+After vm restart when you start the docker conteainer :
+
+[root@Docker-Host ~]# docker start tomcat-container
+
+
+
+[root@Docker-Host ~]# docker ps -a
+CONTAINER ID   IMAGE     COMMAND             CREATED         STATUS         PORTS                                       NAMES
+70b0abd1d7eb   tomcat    "catalina.sh run"   5 seconds ago   Up 4 seconds   0.0.0.0:8081->8080/tcp, :::8081->8080/tcp   tomcat-container
+
+
+
+-d stands for detack remote.
+by default tomcat-container runing with port 8080 internally in Docker-Host.
+To runn in externally(with external network) we are using 8081 port.
+
+Now as 8081 port is introduced as external port, modify the security group also.
+
+After tomcat 9 version there is some issue to open the tomcat server at browser.
+
+::::::::::::::::::::To fix the tomcat container issue follow the below steps:::::::::::::::::
+
+1. login to docker container:
+
+exec        Run a command in a running container.
+t for tag/name
+
+[root@Docker-Host ~]# docker exec -it tomcat-container /bin/bash
+root@70b0abd1d7eb:/usr/local/tomcat#
+
+means we are trying to login this container by /bin/bash
+now we jump into the tomcat server location : /usr/local/tomcat
+
+root@70b0abd1d7eb:/usr/local/tomcat# ls
+bin           conf             lib      logs            NOTICE     RELEASE-NOTES  temp     webapps.dist
+BUILDING.txt  CONTRIBUTING.md  LICENSE  native-jni-lib  README.md  RUNNING.txt    webapps  work
+
+
+root@70b0abd1d7eb:/usr/local/tomcat# cd webapps
+root@70b0abd1d7eb:/usr/local/tomcat/webapps# ls
+root@70b0abd1d7eb:/usr/local/tomcat/webapps#
+
+There there is no content at webapps directory.
+Now when we are trying to open tomcat from browser, it alaways looking for 
+webapps directory for the required application. That is why the issue comes.
+
+But there is a another directory named as webapps.dist which contain all information.
+
+Therefore,
+
+root@70b0abd1d7eb:/usr/local/tomcat# cd webapps.dist/
+
+root@70b0abd1d7eb:/usr/local/tomcat/webapps.dist# ls
+docs  examples  host-manager  manager  ROOT
+
+root@70b0abd1d7eb:/usr/local/tomcat/webapps.dist# cp -R * ../webapps
+
+root@70b0abd1d7eb:/usr/local/tomcat/webapps.dist# ls /usr/local/tomcat/webapps
+docs  examples  host-manager  manager  ROOT
+
+root@70b0abd1d7eb:/usr/local/tomcat/webapps.dist# exit
+exit
+[root@Docker-Host ~]#
+
+
+all contents are same as docker vm.
+We need to copy all content from here to webapps.
+After that our browser issue will resolve.
+
+Now you can see with http://65.1.107.128:8081/ 
+Tomcat server is deployed on docker.
+
+#########################   IMP ##########################################
+Now this issue has been resolved with this tomcat-container.
+But whenver we create some other container with same tomcat image and different external port,
+It will show the same error as the previous work does not change anything on docker images.
+
+To change the docker images and fix the issue, Dockerfiles comes in picture.
+
+
+###########################################################################
+
+:::::::::::::::::::: create a Dockerfile ::::::::::::::::::::::::::::::::::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+[root@Docker-Host ~]# vi Dockerfile
+
+[root@Docker-Host ~]# cat Dockerfile
+FROM centos:latest
+RUN yum install java -y
+RUN mkdir /opt/tomcat
+WORKDIR /opt/tomcat
+ADD https://downloads.apache.org/tomcat/tomcat-9/v9.0.75/bin/apache-tomcat-9.0.75.tar.gz.sha512 .
+RUN tar -xvzf apache-tomcat-9.0.75.tar.gz
+RUN mv apache-tomcat-9.0.75/* /opt/tomcat
+EXPOSE 8080
+CMD ["/opt/tomcat/bin/catalina.sh", "run"]
+
+
+[root@Docker-Host ~]#
+
+Now Dockerfile has been created and now we are creating docker images out of it.
+Means it will perfor the Dockerfile jobs.
+
+[root@Docker-Host ~]# docker build -t mytomcat .
+
+// . represents the current directory and -t represents the tag/name //
+
+But it gives error:
+
+[root@Docker-Host ~]# docker build -t mytomcat .
+
+Sending build context to Docker daemon  12.29kB
+Step 1/9 : FROM centos:latest
+ ---> 5d0da3dc9764
+Step 2/9 : RUN yum install java -y
+ ---> Running in 7a4211f4625c
+CentOS Linux 8 - AppStream                       90  B/s |  38  B     00:00
+Error: Failed to download metadata for repo 'appstream': Cannot prepare internal mirrorlist: No URLs in mirrorlist
+The command '/bin/sh -c yum install java -y' returned a non-zero code: 1
+[root@Docker-Host ~]#
+
+
+### Modified Dockerfile
+
+ 
+
+FROM centos:latest
+RUN cd /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN yum -y install java
+CMD /bin/bash
+RUN mkdir /opt/tomcat
+WORKDIR /opt/tomcat
+ADD https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.74/bin/apache-tomcat-9.0.74.tar.gz .
+RUN tar -xvzf apache-tomcat-9.0.74.tar.gz
+RUN mv apache-tomcat-9.0.74/* /opt/tomcat
+EXPOSE 8080
+CMD ["/opt/tomcat/bin/catalina.sh", "run"]
+
+ 
+
+### Create image from dockerfile
+docker build -t my_tomcat . // my_tomcat is image name and dot(.) is for current working directory
+
+ 
+
+
+### Now create/run container from this docker image
+docker run -d --name my_tomcat-server -p 8083:8080 my_tomcat
+Now the image has been created successfully.
+
+[root@Docker-Host ~]# docker images
+REPOSITORY   TAG       IMAGE ID       CREATED          SIZE
+mytomcat     latest    f476b8009eda   6 minutes ago    511MB
+<none>       <none>    76fcd2c78ec4   11 minutes ago   467MB
+tomcat       latest    311570738ca3   9 days ago       475MB
+centos       latest    5d0da3dc9764   20 months ago    231MB
+
+[root@Docker-Host ~]# docker run -d --name mytomcat-server -p 8082:8080 mytomcat
+51305e400aa70b48ca98b912a75cabed1fa74a19dadebcb9da70e58354466a9a
+[root@Docker-Host ~]# docker ps -a
+CONTAINER ID   IMAGE      COMMAND                  CREATED         STATUS         PORTS                                       NAMES
+51305e400aa7   mytomcat   "/opt/tomcat/bin/cat…"   7 seconds ago   Up 5 seconds   0.0.0.0:8082->8080/tcp, :::8082->8080/tcp   mytomcat-server
+70b0abd1d7eb   tomcat     "catalina.sh run"        10 hours ago    Up 3 hours     0.0.0.0:8081->8080/tcp, :::8081->8080/tcp   tomcat-container
+
+
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Some docker commands:
+
+Remove image:
+[root@Docker-Host ~]# docker rmi mytomcat
+
+Remove container:
+[root@Docker-Host ~]# docker rm 35e8b3ed8859
+
+Stop a docker container:
+[root@Docker-Host docker]# docker stop 57d3316661f9 51305e400aa7 70b0abd1d7eb
+// all are container ID//
+
+delete all dstopped docker container:
+[root@Docker-Host docker]# docker container prune
+
+Delete all docker images as whole:
+[root@Docker-Host docker]# docker image prune -a
+
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:::::::::::::::::::: cutomized Dockerfile for tomcat server:::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+[root@Docker-Host ~]# rm Dockerfile
+rm: remove regular file ‘Dockerfile’? y
+[root@Docker-Host ~]#
+[root@Docker-Host ~]#
+[root@Docker-Host ~]# vi Dockerfile
+[root@Docker-Host ~]# cat Dockerfile
+FROM tomcat:latest
+RUN cp -R /usr/local/tomcat/webapps.dist/* /usr/local/tomcat/webapps
+
+
+[root@Docker-Host ~]# docker build -t demotomcat .
+Sending build context to Docker daemon  19.97kB
+Step 1/2 : FROM tomcat:latest
+ ---> 311570738ca3
+Step 2/2 : RUN cp -R /usr/local/tomcat/webapps.dist/* /usr/local/tomcat/webapps
+ ---> Running in 1efd5b553fd1
+Removing intermediate container 1efd5b553fd1
+ ---> ebf54e0a307a
+Successfully built ebf54e0a307a
+Successfully tagged demotomcat:latest
+[root@Docker-Host ~]#
+
+
+[root@Docker-Host ~]# docker images
+REPOSITORY   TAG       IMAGE ID       CREATED          SIZE
+demotomcat   latest    ebf54e0a307a   2 minutes ago    479MB
+mytomcat     latest    9628283f2891   33 minutes ago   507MB
+<none>       <none>    76fcd2c78ec4   2 hours ago      467MB
+tomcat       latest    311570738ca3   9 days ago       475MB
+centos       latest    5d0da3dc9764   20 months ago    231MB
+
+
+[root@Docker-Host ~]# docker ps -a
+CONTAINER ID   IMAGE      COMMAND                  CREATED          STATUS          PORTS                                       NAMES
+51305e400aa7   mytomcat   "/opt/tomcat/bin/cat…"   14 minutes ago   Up 14 minutes   0.0.0.0:8082->8080/tcp, :::8082->8080/tcp   mytomcat-server
+70b0abd1d7eb   tomcat     "catalina.sh run"        10 hours ago     Up 3 hours      0.0.0.0:8081->8080/tcp, :::8081->8080/tcp   tomcat-container
+[root@Docker-Host ~]#
+
+[root@Docker-Host ~]# docker run -d --name demotomcat-server -p 8083:8080 demotomcat
+57d3316661f99da5004d99fcb907278a13166b165252b12daba34c21ae23ec93
+
+[root@Docker-Host ~]# docker ps -a
+CONTAINER ID   IMAGE        COMMAND                  CREATED          STATUS          PORTS                                       NAMES
+57d3316661f9   demotomcat   "catalina.sh run"        5 seconds ago    Up 3 seconds    0.0.0.0:8083->8080/tcp, :::8083->8080/tcp   demotomcat-server
+51305e400aa7   mytomcat     "/opt/tomcat/bin/cat…"   16 minutes ago   Up 16 minutes   0.0.0.0:8082->8080/tcp, :::8082->8080/tcp   mytomcat-server
+70b0abd1d7eb   tomcat       "catalina.sh run"        10 hours ago     Up 3 hours      0.0.0.0:8081->8080/tcp, :::8081->8080/tcp   tomcat-container
+[root@Docker-Host ~]#
+
+######### here the in the demotomcat-server, we have coppied the /usr/local/tomcat/webapps.dist/ to
+/usr/local/tomcat/webapps to resolve the browser tomcat server page issue.
+######################
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:::::::::::::::::::::::: Integrate Docker with Jenkins ::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+
+Check the existing user and group:
+[root@Docker-Host ~]# cat /etc/passwd
+ec2-user:x:1000:1000:EC2 Default User:/home/ec2-user:/bin/bash
+
+[root@Docker-Host ~]# cat /etc/group
+docker:x:992:
+
+Step1: 
+# add user: dockeradmin
+
+[root@Docker-Host ~]# useradd dockeradmin
+[root@Docker-Host ~]# passwd dockeradmin
+Changing password for user dockeradmin.
+New password:
+BAD PASSWORD: The password contains the user name in some form
+Retype new password:
+passwd: all authentication tokens updated successfully.
+
+
+# Check the created user id:
+[root@Docker-Host ~]# id dockeradmin
+uid=1001(dockeradmin) gid=1001(dockeradmin) groups=1001(dockeradmin)
+
+
+# But we need to add this user under the docker group.
+
+[root@Docker-Host ~]# usermod -aG docker dockeradmin
+[root@Docker-Host ~]# id dockeradmin
+uid=1001(dockeradmin) gid=1001(dockeradmin) groups=1001(dockeradmin),992(docker)
+[root@Docker-Host ~]#
+
+######### imp fact :#########
+But by default ec2 instances does not allow the password based authentication.
+We have to enbale it.
+
+steps to enable the password based authentication.
+[root@Docker-Host ~]# vi /etc/ssh/sshd_config
+[root@Docker-Host ~]# cat /etc/ssh/sshd_config
+
+
+# To disable tunneled clear text passwords, change to no here!
+PasswordAuthentication yes
+#PermitEmptyPasswords no
+#PasswordAuthentication no
+
+
+[root@Docker-Host ~]# service sshd reload
+Redirecting to /bin/systemctl reload sshd.service
+
+#############################
+
+We can also generate the ssh-key with dockeradmin user:
+
+[dockeradmin@Docker-Host ~]$ ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/dockeradmin/.ssh/id_rsa):
+Created directory '/home/dockeradmin/.ssh'.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/dockeradmin/.ssh/id_rsa.
+Your public key has been saved in /home/dockeradmin/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:aR9Txh5ZLsv+V42TsG/aQzzTChYQV9uf0xWWyP7ZTJM dockeradmin@Docker-Host
+The key's randomart image is:
++---[RSA 2048]----+
+|          ..o.+o.|
+|          .o *.+.|
+|           .O o +|
+|         . =o= E*|
+|        S o +=.OB|
+|       . . ++ OoB|
+|          ...+ =.|
+|             o= .|
+|            .ooo |
++----[SHA256]-----+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::: update Dockerfile to automate to deployment process :::::::::::::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+[root@Docker-Host ~]# cd /opt
+[root@Docker-Host opt]# ll
+total 0
+drwxr-xr-x 4 root root 33 May  5 18:09 aws
+drwx--x--x 4 root root 28 May 13 19:59 containerd
+drwxr-xr-x 2 root root  6 Aug 16  2018 rh
+[root@Docker-Host opt]# mkdir docker
+
+[root@Docker-Host opt]# ls -l
+total 0
+drwxr-xr-x 4 root root 33 May  5 18:09 aws
+drwx--x--x 4 root root 28 May 13 19:59 containerd
+drwxr-xr-x 2 root root  6 May 14 10:37 docker
+drwxr-xr-x 2 root root  6 Aug 16  2018 rh
+
+[root@Docker-Host opt]# chown dockeradmin:dockeradmin docker
+[root@Docker-Host opt]# ls -ld docker
+drwxr-xr-x 2 dockeradmin dockeradmin 6 May 14 10:37 docker
+[root@Docker-Host opt]#
+
+[root@Docker-Host ~]# mv Dockerfile /opt/docker/
+
+[root@Docker-Host ~]# cd /opt/docker/
+[root@Docker-Host docker]# ls -l
+total 4
+-rw-r--r-- 1 root root 90 May 14 06:22 Dockerfile
+[root@Docker-Host docker]# chown -R dockeradmin:dockeradmin /opt/docker/
+[root@Docker-Host docker]# ls -l
+total 4
+-rw-r--r-- 1 dockeradmin dockeradmin 90 May 14 06:22 Dockerfile
+[root@Docker-Host docker]#
+
+Now at jenkins change the trasfer path location: from /home/dockeradmin to /opt/docker/
+and copy the deployed artifact/build to webapps location by modifying the Dockerfile.
+
+[root@Docker-Host docker]# vi Dockerfile
+[root@Docker-Host docker]# cat Dockerfile
+FROM tomcat:latest
+RUN cp -R /usr/local/tomcat/webapps.dist/* /usr/local/tomcat/webapps
+COPY ./*war /usr/local/tomcat/webapps
+
+[root@Docker-Host docker]#
+
+[root@Docker-Host docker]# docker build -t tomcat:V1 .
+
+[root@Docker-Host docker]# docker images
+REPOSITORY   TAG       IMAGE ID       CREATED         SIZE
+demotomcat   latest    ebf54e0a307a   5 hours ago     479MB
+mytomcat     latest    9628283f2891   5 hours ago     507MB
+<none>       <none>    76fcd2c78ec4   7 hours ago     467MB
+tomcat       latest    311570738ca3   9 days ago      475MB
+centos       latest    5d0da3dc9764   20 months ago   231MB
+
+
+[root@Docker-Host docker]# docker ps -a
+CONTAINER ID   IMAGE        COMMAND                  CREATED        STATUS       PORTS                                       NAMES
+57d3316661f9   demotomcat   "catalina.sh run"        4 hours ago    Up 4 hours   0.0.0.0:8083->8080/tcp, :::8083->8080/tcp   demotomcat-server
+51305e400aa7   mytomcat     "/opt/tomcat/bin/cat…"   5 hours ago    Up 5 hours   0.0.0.0:8082->8080/tcp, :::8082->8080/tcp   mytomcat-server
+70b0abd1d7eb   tomcat       "catalina.sh run"        15 hours ago   Up 7 hours   0.0.0.0:8081->8080/tcp, :::8081->8080/tcp   tomcat-container
+[root@Docker-Host docker]#
+
+
+[root@Docker-Host docker]# docker build -t tomcat:V1 .
+Sending build context to Docker daemon   5.12kB
+Step 1/3 : FROM tomcat:latest
+ ---> 311570738ca3
+Step 2/3 : RUN cp -R /usr/local/tomcat/webapps.dist/* /usr/local/tomcat/webapps
+ ---> Using cache
+ ---> ebf54e0a307a
+Step 3/3 : COPY ./*war /usr/local/tomcat/webapps
+ ---> 29fdc8a23207
+Successfully built 29fdc8a23207
+Successfully tagged tomcat:V1
+
+[root@Docker-Host docker]# docker images
+REPOSITORY   TAG       IMAGE ID       CREATED          SIZE
+tomcat       V1        29fdc8a23207   30 seconds ago   479MB
+demotomcat   latest    ebf54e0a307a   5 hours ago      479MB
+mytomcat     latest    9628283f2891   5 hours ago      507MB
+<none>       <none>    76fcd2c78ec4   7 hours ago      467MB
+tomcat       latest    311570738ca3   9 days ago       475MB
+centos       latest    5d0da3dc9764   20 months ago    231MB
+
+[root@Docker-Host docker]# docker run -d --name tomcatv1 -p 8084:8080 tomcat:V1
+ebfc9c017bccb5a2150ad1dc35715439c938c241aa2a27a5c0d7f74e7787256f
+
+
+[root@Docker-Host docker]# docker ps -a
+CONTAINER ID   IMAGE        COMMAND                  CREATED          STATUS          PORTS                                       NAMES
+ebfc9c017bcc   tomcat:V1    "catalina.sh run"        13 seconds ago   Up 12 seconds   0.0.0.0:8084->8080/tcp, :::8084->8080/tcp   tomcatv1
+57d3316661f9   demotomcat   "catalina.sh run"        5 hours ago      Up 5 hours      0.0.0.0:8083->8080/tcp, :::8083->8080/tcp   demotomcat-server
+51305e400aa7   mytomcat     "/opt/tomcat/bin/cat…"   5 hours ago      Up 5 hours      0.0.0.0:8082->8080/tcp, :::8082->8080/tcp   mytomcat-server
+70b0abd1d7eb   tomcat       "catalina.sh run"        15 hours ago     Up 7 hours      0.0.0.0:8081->8080/tcp, :::8081->8080/tcp   tomcat-container
+[root@Docker-Host docker]#
+
+Now check with http://65.1.107.128:8084/webapp/
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:::::::::::::::::::::::: Install the Ansible server ::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+[ec2-user@ip-172-31-9-243 ~]$ sudo -i
+[root@ip-172-31-9-243 ~]# vi /etc/hostname
+[root@ip-172-31-9-243 ~]# init 6
+
+[root@AnsibleServer ~]# useradd ansadmin
+[root@AnsibleServer ~]# passwd ansadmin
+Changing password for user ansadmin.
+New password:
+BAD PASSWORD: The password contains the user name in some form
+Retype new password:
+passwd: all authentication tokens updated successfully.
+[root@AnsibleServer ~]#
+
+
+[root@AnsibleServer ~]# visudo
+add ansadmin under wheel and make same as wheel.
+
+[root@AnsibleServer ~]# vi /etc/ssh/sshd_config
+Enable password-based auth.
+
+[root@AnsibleServer ~]# service sshd reload
+
+
+Now try with ansadmin/ansadmin
+[ansadmin@AnsibleServer ~]$ sudo -i
+[root@AnsibleServer ~]#
+
+SSH key generation with ansadmin/ansadmin:
+
+[ansadmin@AnsibleServer ~]$
+[ansadmin@AnsibleServer ~]$ ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/ansadmin/.ssh/id_rsa):
+Created directory '/home/ansadmin/.ssh'.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/ansadmin/.ssh/id_rsa.
+Your public key has been saved in /home/ansadmin/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:AioQ+z1UUQTtcY0Mb30X1SBMP5jfvUPcIP2ZgkuybfA ansadmin@AnsibleServer
+The key's randomart image is:
++---[RSA 2048]----+
+|.     +*+o =o .o+|
+| o   .  o.+.o*  o|
+|o   o  . oo = * .|
+|.. + .  ..  .+.*=|
+|. o o . So o ..==|
+| .   . .  B . o .|
+|         . E   o |
+|          .     .|
+|                 |
++----[SHA256]-----+
+[ansadmin@AnsibleServer ~]$
+
+
+Install ansible2:
+[root@AnsibleServer ~]# amazon-linux-extras install ansible2
+
+
+[root@AnsibleServer ~]#
+[root@AnsibleServer ~]# python --version
+Python 2.7.18
+[root@AnsibleServer ~]# ansible --version
+ansible 2.9.23
+  config file = /etc/ansible/ansible.cfg
+  configured module search path = [u'/root/.ansible/plugins/modules', u'/usr/share/ansible/plugins/modules']
+  ansible python module location = /usr/lib/python2.7/site-packages/ansible
+  executable location = /bin/ansible
+  python version = 2.7.18 (default, Feb 28 2023, 02:51:06) [GCC 7.3.1 20180712 (Red Hat 7.3.1-15)]
+[root@AnsibleServer ~]#
+
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::: Manage DockerHost with Ansible: Integrate docker with Ansible ::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Login to Docker-Host:
+
+[root@Docker-Host ~]# useradd ansadmin
+[root@Docker-Host ~]# passwd ansadmin
+Changing password for user ansadmin.
+New password:
+BAD PASSWORD: The password contains the user name in some form
+Retype new password:
+passwd: all authentication tokens updated successfully.
+[root@Docker-Host ~]#
+
+[root@Docker-Host ~]# visudo
+add ansadmin to sudoers file.
+
+[root@Docker-Host ~]# vi /etc/ssh/sshd_config
+Check and make password-base auth.
+
+checking:
+[root@Docker-Host ~]# vi /etc/ssh/sshd_config
+[root@Docker-Host ~]# grep Password /etc/ssh/sshd_config
+PasswordAuthentication yes
+#PermitEmptyPasswords no
+#PasswordAuthentication no
+# PasswordAuthentication.  Depending on your PAM configuration,
+# PAM authentication, then enable this but set PasswordAuthentication
+
+
+
+Now at AnsibleServer with ansadminuser:
+The default inventory:  /etc/ansible/hosts
+
+Add the Docker-Host (internal IP) to the inventory/hostfile on the AnsibleServer.
+[root@AnsibleServer ansible]# vi /etc/ansible/hosts
+
+[ansadmin@AnsibleServer ~]$ sudo -i
+[root@AnsibleServer ~]# vi /etc/ansible/hosts
+[root@AnsibleServer ~]# vi /etc/ansible/hosts
+[root@AnsibleServer ~]# cat /etc/ansible/hosts
+172.31.14.169
+[root@AnsibleServer ~]#
+
+
+Checking the ssh key:
+
+[ansadmin@AnsibleServer ~]$ ls -la
+total 16
+drwx------ 4 ansadmin ansadmin 109 May 14 13:36 .
+drwxr-xr-x 4 root     root      38 May 14 12:32 ..
+-rw------- 1 ansadmin ansadmin  34 May 14 13:36 .bash_history
+-rw-r--r-- 1 ansadmin ansadmin  18 Jul 15  2020 .bash_logout
+-rw-r--r-- 1 ansadmin ansadmin 193 Jul 15  2020 .bash_profile
+-rw-r--r-- 1 ansadmin ansadmin 231 Jul 15  2020 .bashrc
+drwx------ 3 ansadmin root      25 May 14 13:05 .cache
+drwx------ 2 ansadmin ansadmin  38 May 14 13:01 .ssh
+[ansadmin@AnsibleServer ~]$ cd .ssh/
+[ansadmin@AnsibleServer .ssh]$ ls -l
+total 8
+-rw------- 1 ansadmin ansadmin 1675 May 14 13:01 id_rsa
+-rw-r--r-- 1 ansadmin ansadmin  404 May 14 13:01 id_rsa.pub
+[ansadmin@AnsibleServer .ssh]$
+
+Now we are trying to copy the public Key of AnsibleServer(ansadmin) to Docker-Host(Private IP as all in same VPC).
+
+[ansadmin@AnsibleServer ~]$ ssh-copy-id 172.31.14.169
+
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/ansadmin/.ssh/id_rsa.pub"
+The authenticity of host '172.31.14.169 (172.31.14.169)' can't be established.
+ECDSA key fingerprint is SHA256:qdXTxgvgJeT5RiQ8mQtYCVJIqAFuEpzzCelqE3IEEKc.
+ECDSA key fingerprint is MD5:88:4e:37:c1:bb:66:29:cf:88:8e:71:8b:9e:af:a8:09.
+Are you sure you want to continue connecting (yes/no)? yes
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+ansadmin@172.31.14.169's password:
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh '172.31.14.169'"
+and check to make sure that only the key(s) you wanted were added.
+
+Now trying to ping Docker-Host from AnsibleServer (passwordless auth)
+
+[ansadmin@AnsibleServer ~]$ ansible all -m ping
+
+[WARNING]: Platform linux on host 172.31.14.169 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python
+interpreter could change this. See https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information.
+172.31.14.169 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+[ansadmin@AnsibleServer ~]$ ansible 172.31.14.169 -m ping
+
+[WARNING]: Platform linux on host 172.31.14.169 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python
+interpreter could change this. See https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information.
+172.31.14.169 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+[ansadmin@AnsibleServer ~]$
+
+checking the uptime in both server:
+
+[ansadmin@Docker-Host .ssh]$ uptime
+ 16:08:44 up  4:23,  1 user,  load average: 0.00, 0.00, 0.00
+[ansadmin@Docker-Host .ssh]$
+
+
+[ansadmin@AnsibleServer ~]$ ansible all -a uptime
+[WARNING]: Platform linux on host 172.31.14.169 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python
+interpreter could change this. See https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information.
+172.31.14.169 | CHANGED | rc=0 >>
+ 16:08:20 up  4:22,  2 users,  load average: 0.00, 0.00, 0.00
+
+
+
+[ansadmin@AnsibleServer ~]$ ansible all -m command -a uptime
+[WARNING]: Platform linux on host 172.31.14.169 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python
+interpreter could change this. See https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information.
+172.31.14.169 | CHANGED | rc=0 >>
+ 16:08:37 up  4:23,  2 users,  load average: 0.00, 0.00, 0.00
+[ansadmin@AnsibleServer ~]$
+
+Both are same.
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::: Integrate Ansible with Jenkins :::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Here, Jenkins is taking care the build related activities and 
+Ansible is taking care the deployment related activities.
+
+Jenkins copy the artifact to Ansible and 
+Ansible will create the images or deploy the container on the docker.
+
+Almost similar activities like Docker-Host integration with Jenkins.
+
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::: Build an image and create container on Ansible :::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Install Docker on AnsibleServer:
+[ansadmin@AnsibleServer docker]$ sudo yum install docker -y
+
+Check the docker group:
+[ansadmin@AnsibleServer docker]$ cat /etc/group
+
+Now adding the ansadmin into the docker group then only we can execute the docker commands
+as the ansadmin.
+
+adding the ansadmin into the docker group:
+[ansadmin@AnsibleServer docker]$ sudo usermod -aG docker ansadmin
+
+Check the ID of ansadmin:
+[ansadmin@AnsibleServer docker]$ id ansadmin
+uid=1001(ansadmin) gid=1001(ansadmin) groups=1001(ansadmin),992(docker)
+
+Check the docker services:
+[ansadmin@AnsibleServer docker]$ service docker status
+
+Start the docker service:
+[ansadmin@AnsibleServer docker]$ sudo service docker start
+
+Check again the docker services:
+[ansadmin@AnsibleServer docker]$ service docker status
+
+Create the build image: For this we need the Dockerfile.
+The Dockerfile is residing at Docker-Host.
+Just copy the content and make a Dockerfile at AnsibleServer of ansadmin.
+
+
+Create a Dockerfile under /opt/docker:
+[ansadmin@AnsibleServer docker]$ vi Dockerfile
+[ansadmin@AnsibleServer docker]$ cat Dockerfile
+FROM tomcat:latest
+RUN cp -R /usr/local/tomcat/webapps.dist/* /usr/local/tomcat/webapps
+COPY ./*war /usr/local/tomcat/webapps
+
+
+Now create a docker image:
+[ansadmin@AnsibleServer docker]$ sudo docker build -t regapp:v1 .
+
+
+Check the docker images:
+[ansadmin@AnsibleServer docker]$ sudo docker images
+REPOSITORY   TAG       IMAGE ID       CREATED              SIZE
+regapp       v1        321ee4bc422d   About a minute ago   479MB
+tomcat       latest    311570738ca3   10 days ago          475MB
+
+
+Create docker container:
+[ansadmin@AnsibleServer docker]$ sudo docker run -t --name regapp -p 8081:8080 regapp:v1
+// -t for logs are pasted in terminal.//
+And if you press ctrl+c , container will be exited.
+
+
+Now see the app with : http://65.0.122.201:8081/webapp/
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::: Ansible playbook to create image and container ::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Ansible playbook use to create the docker image.
+In further enhance ansible playbook is used for add /tag/commited to the DockerHub.
+So that it will available on the containerization enviorment(Docker-Host).
+
+Create a Ansible playbook to create a docker image:
+
+
+
+---
+- hosts: ansible                                  //or we can give IP of ansible-server as well
+  tasks:
+    - name: create docker image
+      command: docker build -t regapp:latest .    // dot(.) is for current directory docker build -t regapp:latest -f /home/directory/ // if Dockerfile is located in other directory
+      args:
+       chdir: /opt/docker                         // the plsybook can be stored in any directory but it will be executed in /opt/docker
+
+
+
+[ansadmin@AnsibleServer docker]$ vi regapp.yml
+[ansadmin@AnsibleServer docker]$ cat regapp.yml
+
+
+---
+- hosts: ansible
+
+  tasks:
+  - name: create docker image
+    command: docker build -t regapp:latest .
+    args:
+     chdir: /opt/docker
+
+
+[ansadmin@AnsibleServer docker]$
+[ansadmin@AnsibleServer docker]$ ansible-playbook regapp.yml
+
+PLAY [ansible] **********************************************************************************************************************************************
+
+TASK [Gathering Facts] **************************************************************************************************************************************
+[WARNING]: Platform linux on host 172.31.9.243 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python
+interpreter could change this. See https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information.
+ok: [172.31.9.243]
+
+TASK [create docker image] **********************************************************************************************************************************
+changed: [172.31.9.243]
+
+PLAY RECAP **************************************************************************************************************************************************
+172.31.9.243               : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+[ansadmin@AnsibleServer docker]$ docker images
+REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+regapp       latest    321ee4bc422d   17 hours ago   479MB
+regapp       v1        321ee4bc422d   17 hours ago   479MB
+tomcat       latest    311570738ca3   10 days ago    475MB
+[ansadmin@AnsibleServer docker]$
+
+
+::::Note:::
+
+Now image is build by ansible-playbook.
+now by ansible we will push the image to DockerHub 
+so that the Docker-Host will pull the images to create the container on to it.
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::: Copy Image do DockerHub :::::::::::::::::::::::::::::::::::::::::::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+here, we are pushing our image to dockerhub.Dockerhub only hold our docker images.
+It is done by ansible-playbook.
+
+To do so,
+1st we need to login dockerhub from our ansible system.
+
+[ansadmin@AnsibleServer docker]$ docker login
+
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: manojguha4
+Password:
+WARNING! Your password will be stored unencrypted in /home/ansadmin/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+[ansadmin@AnsibleServer docker]$
+
+Now pushing the images from AnsibleServer to DockerHub:
+
+[ansadmin@AnsibleServer docker]$ docker images
+REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+regapp       latest    321ee4bc422d   17 hours ago   479MB
+regapp       v1        321ee4bc422d   17 hours ago   479MB
+tomcat       latest    311570738ca3   10 days ago    475MB
+
+[ansadmin@AnsibleServer docker]$
+
+[ansadmin@AnsibleServer docker]$ docker tag 321ee4bc422d manojguha4/regapp:latest
+
+[ansadmin@AnsibleServer docker]$ docker images
+REPOSITORY          TAG       IMAGE ID       CREATED        SIZE
+regapp              latest    321ee4bc422d   17 hours ago   479MB
+regapp              v1        321ee4bc422d   17 hours ago   479MB
+manojguha4/regapp   latest    321ee4bc422d   17 hours ago   479MB
+tomcat              latest    311570738ca3   10 days ago    475MB
+
+[ansadmin@AnsibleServer docker]$ docker push manojguha4/regapp:latest
+The push refers to repository [docker.io/manojguha4/regapp]
+a159ed6f0cab: Pushed
+62e825190d1f: Pushed
+77053300ced4: Mounted from library/tomcat
+5f5c35512859: Mounted from library/tomcat
+74d620724878: Mounted from library/tomcat
+57b27cfbd6e6: Mounted from library/tomcat
+b421f864ecf0: Mounted from library/tomcat
+b09de1b6a666: Mounted from library/tomcat
+b8a36d10656a: Mounted from library/tomcat
+latest: digest: sha256:b232b2c0d7ca4cb35c56c798bdf01aa27c9db840de9656af306fc655bbefa91f size: 2207
+[ansadmin@AnsibleServer docker]$
+
+Now see at DockerHub: https://hub.docker.com/repositories/manojguha4
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:::::::::::::::: Jenkins jobs to build an image onto Ansible ::::::::::::::::::::::::::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+[ansadmin@AnsibleServer docker]$ pwd
+/opt/docker
+
+[ansadmin@AnsibleServer docker]$ ls -ld regapp.yml
+-rw-rw-r-- 1 ansadmin ansadmin 141 May 15 12:13 regapp.yml
+[ansadmin@AnsibleServer docker]$
+
+Now we are pushing the image to dockerhub by ansible-playbook:
+Edit the ansible-playbook: regapp.yml file.
+
+[ansadmin@AnsibleServer docker]$ vi regapp.yml
+
+[ansadmin@AnsibleServer docker]$ cat regapp.yml
+---
+- hosts: ansible
+
+  tasks:
+  - name: create docker image
+    command: docker build -t regapp:latest .
+    args:
+     chdir: /opt/docker
+
+  - name: create tag the image onto dockerhub
+    command: docker tag regapp:latest manojguha4/regapp:latest
+
+  - name: Push the image to dockerhub
+    command: docker push manojguha4/regapp:latest
+
+
+Now validate the created ansible-playbook:
+
+[ansadmin@AnsibleServer docker]$ ansible-playbook regapp.yml --check
+
+PLAY [ansible] **********************************************************************************************************************************************
+
+TASK [Gathering Facts] **************************************************************************************************************************************
+[WARNING]: Platform linux on host 172.31.9.243 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python
+interpreter could change this. See https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information.
+ok: [172.31.9.243]
+
+TASK [create docker image] **********************************************************************************************************************************
+skipping: [172.31.9.243]
+
+TASK [create tag the image onto dockerhub] ******************************************************************************************************************
+skipping: [172.31.9.243]
+
+TASK [Push the image to dockerhub] **************************************************************************************************************************
+skipping: [172.31.9.243]
+
+PLAY RECAP **************************************************************************************************************************************************
+172.31.9.243               : ok=1    changed=0    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
+
+[ansadmin@AnsibleServer docker]$
+
+Check the hosts under [ansible] group:
+[ansadmin@AnsibleServer docker]$ cat /etc/ansible/hosts
+[dockerhost]
+172.31.14.169
+
+[ansible]
+172.31.9.243
+
+Now run the ansible-playbook:
+Here we need to remind some point:
+ansible-playbook running successfully (for docker image pushing) only 
+when you login to dockerhub with the same account as same as where the ansible-playbook written.
+Like here with ansadmin, ansible-playbook is written and dockerhub also login with the ansadmin.
+
+
+Now, we are trying to run the playbook under only [ansible] group. We can see it at out playbook.
+Now, we can also limit the ansible playbook running on a particular host under the group.
+Here, we have only one host is there under the [anisble] group, that is why we can not see any changes with the below command.
+But for knowledge purpose we care executing the below command.
+
+[ansadmin@AnsibleServer docker]$ cat /etc/ansible/hosts
+
+Below two commands are giving same output as there is only one host under [ansible].
+
+[ansadmin@AnsibleServer docker]$ ansible-playbook regapp.yml --limit 172.31.9.243
+[ansadmin@AnsibleServer docker]$ ansible-playbook regapp.yml
+
+
+[ansadmin@AnsibleServer docker]$ ansible-playbook regapp.yml --limit 172.31.9.243
+
+PLAY [ansible] **********************************************************************************************************************************************
+
+TASK [Gathering Facts] **************************************************************************************************************************************
+[WARNING]: Platform linux on host 172.31.9.243 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python
+interpreter could change this. See https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information.
+ok: [172.31.9.243]
+
+TASK [create docker image] **********************************************************************************************************************************
+changed: [172.31.9.243]
+
+TASK [create tag the image onto dockerhub] ******************************************************************************************************************
+changed: [172.31.9.243]
+
+TASK [Push the image to dockerhub] **************************************************************************************************************************
+changed: [172.31.9.243]
+
+PLAY RECAP **************************************************************************************************************************************************
+172.31.9.243               : ok=4    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+
+[ansadmin@AnsibleServer docker]$ docker images
+REPOSITORY          TAG       IMAGE ID       CREATED        SIZE
+regapp              latest    321ee4bc422d   19 hours ago   479MB
+regapp              v1        321ee4bc422d   19 hours ago   479MB
+manojguha4/regapp   latest    321ee4bc422d   19 hours ago   479MB
+tomcat              latest    311570738ca3   10 days ago    475MB
+
+Now we can see the time-stamp after executing the playbook. 
+It is updated in few sec back.
+https://hub.docker.com/repositories/manojguha4
+
+
+Now we are putting this command(ansible-playbook regapp.yml)in Jenkins server. 
+Therefore, no need to execute the this command manually. 
+Whenever any code is changed(or for a new image) at GitHub, 
+it will automatically detect by Poll SCM and execute the playbook.
+
+Therefore, creating a new job in Jenkins: wordpad.
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::: create container on DockerHost using ansible-playbook  :::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+[ansadmin@AnsibleServer docker]$
+[ansadmin@AnsibleServer docker]$
+[ansadmin@AnsibleServer docker]$ clear
+[ansadmin@AnsibleServer docker]$
+[ansadmin@AnsibleServer docker]$ vi deploy_regapp.yml
+[ansadmin@AnsibleServer docker]$ cat deploy_regapp.yml
+---
+- hosts: dockerhost
+
+  tasks:
+  - name: create container
+    command: docker run -d --name regapp-server -p 8083:8080 manojguha4/regapp:latest
+
+[ansadmin@AnsibleServer docker]$
+
+[ansadmin@AnsibleServer docker]$ ansible-playbook deploy_regapp.yml --check
+
+PLAY [dockerhost] *******************************************************************************************************************************************
+
+TASK [Gathering Facts] **************************************************************************************************************************************
+[WARNING]: Platform linux on host 172.31.14.169 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python
+interpreter could change this. See https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information.
+ok: [172.31.14.169]
+
+TASK [create container] *************************************************************************************************************************************
+skipping: [172.31.14.169]
+
+PLAY RECAP **************************************************************************************************************************************************
+172.31.14.169              : ok=1    changed=0    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+
+
+
+
+
+delete all images and container from dockerhost:
+
+[root@Docker-Host ~]# service docker start
+Redirecting to /bin/systemctl start docker.service
+
+[root@Docker-Host ~]# docker ps -a
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+[root@Docker-Host ~]# docker images
+REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+regapp       v1        fd1bb9ac821f   30 hours ago   479MB
+tomcat       latest    311570738ca3   11 days ago    475MB
+[root@Docker-Host ~]#
+
+[root@Docker-Host ~]# docker rmi regapp
+Error: No such image: regapp
+
+[root@Docker-Host ~]# docker tomcat
+docker: 'tomcat' is not a docker command.
+See 'docker --help'
+
+[root@Docker-Host ~]# docker rmi tomcat
+Untagged: tomcat:latest
+Untagged: tomcat@sha256:74683fce813ff49eb65e01074774d499c52d198be503a06577f3225290faadba
+
+[root@Docker-Host ~]# docker images
+REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+regapp       v1        fd1bb9ac821f   30 hours ago   479MB
+
+[root@Docker-Host ~]# docker rmi -f regapp
+Error: No such image: regapp
+[root@Docker-Host ~]#
+
+at AnsibleServer:
+[ansadmin@AnsibleServer docker]$ ansible-playbook deploy_regapp.yml
+
+Now create one ansible-playbook to deploy container onto dockerhost 
+by which it will pull the image from dockerhub and run the function.
+By this, dockerhost create one image and deploy a container.
+
+Now we can see the application with: http://52.66.250.80:8083/webapp/
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:::::::::::: Contineous deployment of docker container using ansile-playbook ::::::::::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+If you execute the ansible-playbook again then it will gives error:
+
+To overcome the situation we will perform the next steps.
+
+To do so we have to perform some below steps with ansible-playbook:
+•	Remove existing container
+•	Remove existing images
+•	Create new container
+
+After that add this ansible-playbook to our Jenkins so that Jenkins will perform the continuous deployment process.
+
+So now update the ansible play-book now:
+
+[ansadmin@AnsibleServer docker]$ cat deploy_regapp.yml
+---
+- hosts: dockerhost
+
+  tasks:
+  - name: stop the existing container
+    command: docker stop regapp-server
+    ignore_errors: yes
+
+  - name: remove the existing container
+    command: docker rm regapp-server
+    ignore_errors: yes
+
+  - name: remove the existing image
+    command: docker rmi manojguha4/regapp:latest
+    ignore_errors: yes
+
+  - name: create container
+    command: docker run -d --name regapp-server -p 8083:8080 manojguha4/regapp:latest
+[ansadmin@AnsibleServer docker]$
+
+[ansadmin@AnsibleServer docker]$ ansible-playbook deploy_regapp.yml --check
+
+[ansadmin@AnsibleServer docker]$ ansible-playbook deploy_regapp.yml
+
+At Docker-Host:
+
+[root@Docker-Host docker]# docker images
+REPOSITORY          TAG       IMAGE ID       CREATED              SIZE
+manojguha4/regapp   latest    8a1c5603351e   About a minute ago   479MB
+
+
+[root@Docker-Host docker]# docker ps -a
+CONTAINER ID   IMAGE                      COMMAND             CREATED          STATUS          PORTS                                       NAMES
+a9e9d10d731d   manojguha4/regapp:latest   "catalina.sh run"   14 seconds ago   Up 13 seconds   0.0.0.0:8083->8080/tcp, :::8083->8080/tcp   regapp-server
+
+
+[root@Docker-Host docker]# docker ps -a
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+
+[root@Docker-Host docker]# docker images
+REPOSITORY   TAG       IMAGE ID   CREATED   SIZE
+
+
+[root@Docker-Host docker]# docker images
+REPOSITORY          TAG       IMAGE ID       CREATED          SIZE
+manojguha4/regapp   latest    8a1c5603351e   24 minutes ago   479MB
+
+
+[root@Docker-Host docker]# docker ps -a
+CONTAINER ID   IMAGE                      COMMAND             CREATED         STATUS         PORTS                                       NAMES
+70feac79a673   manojguha4/regapp:latest   "catalina.sh run"   3 seconds ago   Up 2 seconds   0.0.0.0:8083->8080/tcp, :::8083->8080/tcp   regapp-server
+
+
+Dcoker_image_module: 
+https://docs.ansible.com/ansible/latest/collections/community/docker/docker_image_module.html
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: Jenkins CI/CD to deploy on container using ansible ::::::::::::::::::::::::::::::::::::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+We are changing our code on git and push it to GitHub and Jenkins will automatically do create the container on the dockerhost.
+
+Login to Jenkins:
+Select the job- copy_artifact_Onto_AnsibleConfigure
+Poll SCM(* * * * *)
+Exec command(ansible-playbook /opt/docker/regapp.yml; sleep 10; ansible-playbook deploy_regapp.yml)
+appy&save.
+
+Now changing the code in git in workstation and push it to GitHub:
+
+
+$ cd /Documents/devops/repository/hello-world/webapp/src/main/webapp
+
+$ vi login.html
+
+$ git status
+
+$ git add login.html
+
+$ git commit -m "modified"
+
+$ git push origin master
+
+Now automatically run the job by Jenkins and deploy a container on Docker-Host.
+
+[root@Docker-Host docker]# docker ps -a
+CONTAINER ID   IMAGE                      COMMAND             CREATED         STATUS         PORTS                                       NAMES
+06990b61dc0e   manojguha4/regapp:latest   "catalina.sh run"   3 minutes ago   Up 3 minutes   0.0.0.0:8083->8080/tcp, :::8083->8080/tcp   regapp-server
+
+Checking the application by: 52.66.250.80:8083/webapp/login.html
+
+Full CI/CD operation done now.
+
+
+
+
+:::::::::::::::::::::::: manifest file ::::::::::::::::::::::::::::::::
+
+
+Creation of pod:
+
+Vi pod.yml
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-pod
+  labels:
+    app: demo-app
+
+spec:
+  containers:
+    - name: demo-nginx
+	  image: nginx
+	  ports: 
+	    -name: demo-nginx
+		 containerPort: 80
+
+
+
+
+:::::::::::::::::::::::: Service manifest file ::::::::::::::::::::::
+
+
+vi service.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-service
+
+spec:
+  ports:
+  - name: nginx-port
+    port: 80
+    targetPort: 80
+  
+  type: LoadBalancer
+
+:wq!
+
+  
+
+Now adding selector here:
+
+vi service.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-service
+
+spec:
+  ports:
+  - name: nginx-port
+    port: 80
+    targetPort: 80
+  
+  selector:
+    app: demo-app
+  
+  type: LoadBalancer
+
+:wq!
+
+
+
+::::::::::::: deployment file :::::::::::::::::::::
+
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: valaxy-regapp
+  labels: 
+     app: regapp
+
+spec:
+  replicas: 3 
+  selector:
+    matchLabels:
+      app: regapp
+
+  template:
+    metadata:
+      labels:
+        app: regapp
+    spec:
+      containers:
+      - name: regapp
+        image: valaxy/regapp
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+	  
+	  
+
+
+# vi regapp-service.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: valaxy-service
+  labels:
+    app: regapp 
+spec:
+  selector:
+    app: regapp 
+
+  ports:
+    - port: 8080
+      targetPort: 8080
+
+  type: LoadBalancer
+  
+
+
+:::::::::::::::::::::::Integrate Kubernetes bootstrap server with Ansible ::::::::::::::::::::
+
+at ansible-server:
+$ cd /opt/docker
+$ vi hosts
+
+localhost
+
+[kubernetes]
+<Bootstrap Private IP>
+
+[ansible]
+<ansible private IP>
+
+
+:wq!
+
+::::::::::: Create ansible playbooks for deploy and service files ::::::::::::::::::::::
+
+On Ansible-server with ansadmin:
+
+$ cd /opt/docker
+$ vi kube_deploy.yml
+
+---
+- hosts: kubernetes
+#  become: ture
+  user: root
+
+  tasks:
+    - name: deploy regapp on kubernetes
+      command: kubectl apply -f regapp-deployment.yml
+
+    - name: create service for regapp
+      command: kubectl apply -f regapp-service.yml
+
+:wq!
+
+creating a kube_service.yml file:
+
+$ vi kube_service.yml
+
+---
+
